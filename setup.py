@@ -11,7 +11,6 @@ setup(
     description='Official Bitfinex Python API',
     keywords='bitfinex,api,trading',
     install_requires=[
-        'asyncio~=3.0',
         'websockets~=10.4',
         'typing_extensions~=4.4.0',
         'pyee~=9.0.4'
