@@ -2,9 +2,11 @@ import json, asyncio, hmac, hashlib, time, websockets
 
 from pyee.asyncio import AsyncIOEventEmitter
 
-from .handlers import Channels, PublicChannelsHandler, AuthenticatedChannelsHandler
+from .handlers import PublicChannelsHandler, AuthenticatedChannelsHandler
 
 from .errors import ConnectionNotOpen, WebsocketAuthenticationRequired, InvalidAuthenticationCredentials, EventNotSupported, OutdatedClientVersion
+
+from ..utils.custom_logger import CustomLogger
 
 HEARTBEAT = "hb"
 
@@ -36,7 +38,7 @@ class BfxWebsocketClient(object):
         *AuthenticatedChannelsHandler.EVENTS
     ]
 
-    def __init__(self, host, API_KEY=None, API_SECRET=None):
+    def __init__(self, host, log_level, API_KEY=None, API_SECRET=None):
         self.host, self.chanIds, self.event_emitter = host, dict(), AsyncIOEventEmitter()
 
         self.websocket, self.API_KEY, self.API_SECRET = None, API_KEY, API_SECRET
@@ -47,6 +49,8 @@ class BfxWebsocketClient(object):
             "public": PublicChannelsHandler(event_emitter=self.event_emitter),
             "authenticated": AuthenticatedChannelsHandler(event_emitter=self.event_emitter)
         }
+
+        self.logger = CustomLogger('BfxWebsocket', logLevel=log_level)
 
     async def connect(self):
         async for websocket in websockets.connect(self.host):
@@ -78,6 +82,7 @@ class BfxWebsocketClient(object):
                             self.authentication = True
                         else: raise InvalidAuthenticationCredentials("Cannot authenticate with given API-KEY and API-SECRET.")
                     elif isinstance(message, dict) and message["event"] == "error":
+                        self.logger.error(f"{message['code']} - {message['msg']}")
                         self.event_emitter.emit("error", message["code"], message["msg"])
                     elif isinstance(message, list) and message[1] != HEARTBEAT:
                         if ((chanId := message[0]) or True) and chanId == 0:
@@ -88,6 +93,7 @@ class BfxWebsocketClient(object):
 
     @_require_websocket_connection
     async def subscribe(self, channel, **kwargs):
+        self.logger.info(f"Subscribing to channel {channel}...")
         await self.websocket.send(json.dumps({
             "event": "subscribe",
             "channel": channel,
@@ -96,6 +102,7 @@ class BfxWebsocketClient(object):
 
     @_require_websocket_connection
     async def unsubscribe(self, chanId):
+        self.logger.info(f"Unsubscribing from chainId {chanId}...")
         await self.websocket.send(json.dumps({
             "event": "unsubscribe",
             "chanId": chanId
@@ -127,18 +134,20 @@ class BfxWebsocketClient(object):
 
     def on(self, event):
         if event not in BfxWebsocketClient.EVENTS:
-            raise EventNotSupported(f"Event <{event}> is not supported. To get a list of available events use BfxWebsocketClient.EVENTS.")
+            raise EventNotSupported(f"Event <{event}> is not supported. To get a list of available events print bfx.wss.EVENTS")
 
         def handler(function):
+            self.logger.info(f"Emitted event {event}")
             self.event_emitter.on(event, function)
 
         return handler 
 
     def once(self, event):
         if event not in BfxWebsocketClient.EVENTS:
-            raise EventNotSupported(f"Event <{event}> is not supported. To get a list of available events use BfxWebsocketClient.EVENTS.")
+            raise EventNotSupported(f"Event <{event}> is not supported. To get a list of available events print bfx.wss.EVENTS")
 
         def handler(function):
+            self.logger.info(f"Emitted event {event} (once)")
             self.event_emitter.once(event, function)
 
         return handler 
