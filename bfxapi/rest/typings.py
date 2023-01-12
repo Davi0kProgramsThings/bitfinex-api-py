@@ -39,6 +39,26 @@ class FundingCurrencyTicker(TypedDict):
     LOW: float
     FRR_AMOUNT_AVAILABLE: float
 
+class FundingCredits(TypedDict):
+    ID: int
+    SYMBOL: str
+    SIDE: int
+    MTS_CREATE: int
+    MTS_UPDATE: int
+    AMOUNT: float
+    FLAGS: JSON
+    STATUS: str
+    RATE_TYPE: str
+    RATE: float
+    PERIOD: int
+    MTS_OPENING: int
+    MTS_LAST_PAYOUT: int
+    NOTIFY: int
+    HIDDEN: int
+    RENEW: int
+    NO_CLOSE: int
+    POSITION_PAIR: str
+
 class TickersHistory(TypedDict):
     SYMBOL: str
     BID: float
@@ -194,10 +214,41 @@ class Trade(TypedDict):
     EXEC_PRICE: float 
     ORDER_TYPE: str 
     ORDER_PRICE: float 
-    MAKER:int
+    MAKER: int
     FEE: float
     FEE_CURRENCY: str
     CID: int
+
+class OrderTrade(TypedDict):
+    ID: int
+    PAIR: str
+    MTS_CREATE: int
+    ORDER_ID: int
+    EXEC_AMOUNT: float
+    EXEC_PRICE: float
+    MAKER: int
+    FEE: float
+    FEE_CURRENCY: str
+    CID: int
+
+class Position(TypedDict):
+    SYMBOL: str
+    STATUS: str
+    AMOUNT: float
+    BASE_PRICE: float
+    FUNDING: float
+    FUNDING_TYPE: int
+    PL: float
+    PL_PERC: float
+    PRICE_LIQ: float
+    LEVERAGE: float
+    POSITION_ID: int
+    MTS_CREATE: int
+    MTS_UPDATE: int
+    TYPE: int
+    COLLATERAL: float
+    COLLATERAL_MIN: float
+    META: JSON
 
 class Ledger(TypedDict):
     ID: int

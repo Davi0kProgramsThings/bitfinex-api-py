@@ -247,8 +247,16 @@ class _RestAuthenticatedEndpoints(_Requests):
     def get_wallets(self) -> List[Wallet]:
         return [ serializers.Wallet.parse(*subdata) for subdata in self._POST("auth/r/wallets") ]
 
-    def get_orders(self, ids: Optional[List[str]] = None) -> List[Order]:
-        return [ serializers.Order.parse(*subdata) for subdata in self._POST("auth/r/orders", data={ "id": ids }) ]
+    def get_orders(self, symbol: Optional[str]=None, ids: Optional[List[str]] = None) -> List[Order]:
+        endpoint = "auth/r/orders"
+
+        if symbol is not None:
+            endpoint += f"/{symbol}"
+
+        return [ serializers.Order.parse(*subdata) for subdata in self._POST(endpoint, data={ "id": ids }) ]
+
+    def get_positions(self) -> List[Position]:
+        return [ serializers.Order.parse(*subdata) for subdata in self._POST("auth/r/positions", data={}) ]
 
     def submit_order(self, type: OrderType, symbol: str, amount: Union[Decimal, str], 
                      price: Optional[Union[Decimal, str]] = None, lev: Optional[int] = None, 
@@ -311,8 +319,17 @@ class _RestAuthenticatedEndpoints(_Requests):
 
         return [ serializers.Order.parse(*subdata) for subdata in self._POST(endpoint, data=data) ]
 
-    def get_trades(self, symbol: str) -> List[Trade]:
-        return [ serializers.Trade.parse(*subdata) for subdata in self._POST(f"auth/r/trades/{symbol}/hist") ]
+    def get_trades(self, symbol: str, start: Optional[str] = None, end: Optional[str] = None, sort: Optional[str] = None, limit: Optional[str] = None) -> List[Trade]:
+        data = {
+            "sort": sort,
+            "start": start, "end": end,
+            "limit": limit
+        }
+
+        return [ serializers.Trade.parse(*subdata) for subdata in self._POST(f"auth/r/trades/{symbol}/hist", data=data) ]
+
+    def get_order_trades(self, symbol: str, order_id: str) -> List[OrderTrade]:
+        return [ serializers.Trade.parse(*subdata) for subdata in self._POST(f"auth/r/order/{symbol}:{order_id}/trades") ]
 
     def get_ledgers(self, currency: str, category: Optional[int] = None, start: Optional[str] = None, end: Optional[str] = None, limit: Optional[int] = None) -> List[Ledger]:
         data = {
@@ -323,10 +340,10 @@ class _RestAuthenticatedEndpoints(_Requests):
 
         return [ serializers.Ledger.parse(*subdata) for subdata in self._POST(f"auth/r/ledgers/{currency}/hist", data=data) ]
 
-    def get_active_funding_offers(self, symbol: Optional[str] = None) -> List[FundingOffer]:
+    def get_funding_offers(self, symbol: Optional[str] = None) -> List[FundingOffer]:
         endpoint = "auth/r/funding/offers"
 
-        if symbol != None:
+        if symbol is not None:
             endpoint += f"/{symbol}"
 
         return [ serializers.FundingOffer.parse(*subdata) for subdata in self._POST(endpoint) ]
@@ -341,3 +358,24 @@ class _RestAuthenticatedEndpoints(_Requests):
         }
 
         return serializers._Notification(serializer=serializers.FundingOffer).parse(*self._POST("auth/w/funding/offer/submit", data=data))
+
+    def get_funding_offers_history(self, symbol: Optional[str] = None, start: Optional[str] = None, end: Optional[str] = None, limit: Optional[int] = None) -> List[FundingOffer]:
+        endpoint = f"auth/r/funding/offers/{symbol}/hist"
+
+        data = {
+            "start": start, "end": end,
+            "limit": limit
+        }
+
+        return [ serializers.FundingOffer.parse(*subdata) for subdata in self._POST(endpoint, data=data) ]
+
+    def get_funding_credits(self, symbol: str) -> List[FundingCredits]:
+        return [ serializers.FundingOffer.parse(*subdata) for subdata in self._POST(f"auth/r/funding/credits/{symbol}") ]
+
+    def get_funding_credits_history(self, symbol: str, start: Optional[str] = None, end: Optional[str] = None, limit: Optional[int] = None) -> List[FundingCredits]:
+        data = {
+            "start": start, "end": end,
+            "limit": limit
+        }
+
+        return [ serializers.FundingOffer.parse(*subdata) for subdata in self._POST(f"auth/r/funding/credits/{symbol}/hist", data=data) ]

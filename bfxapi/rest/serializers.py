@@ -44,6 +44,27 @@ FundingCurrencyTicker = _Serializer[typings.FundingCurrencyTicker]("FundingCurre
     "FRR_AMOUNT_AVAILABLE"
 ])
 
+FundingCredits = _Serializer[typings.FundingCredits]("FundingCredits", labels=[
+    "ID",
+    "SYMBOL",
+    "SIDE",
+    "MTS_CREATE",
+    "MTS_UPDATE",
+    "AMOUNT",
+    "FLAGS",
+    "STATUS",
+    "RATE_TYPE",
+    "RATE",
+    "PERIOD",
+    "MTS_OPENING",
+    "MTS_LAST_PAYOUT",
+    "NOTIFY",
+    "HIDDEN",
+    "RENEW",
+    "NO_CLOSE",
+    "POSITION_PAIR"
+])
+
 TickersHistory = _Serializer[typings.TickersHistory]("TickersHistory", labels=[
     "SYMBOL",
     "BID",
@@ -234,6 +255,26 @@ Order = _Serializer[typings.Order]("Order", labels=[
     "META"
 ])
 
+Position = _Serializer[typings.Position]("Position", labels=[
+    "SYMBOL",
+    "STATUS",
+    "AMOUNT",
+    "BASE_PRICE",
+    "FUNDING",
+    "FUNDING_TYPE",
+    "PL",
+    "PL_PERC",
+    "PRICE_LIQ",
+    "LEVERAGE",
+    "POSITION_ID",
+    "MTS_CREATE",
+    "MTS_UPDATE",
+    "TYPE",
+    "COLLATERAL",
+    "COLLATERAL_MIN",
+    "META"
+])
+
 FundingOffer = _Serializer[typings.FundingOffer]("FundingOffer", labels=[
     "ID",
     "SYMBOL",
@@ -256,6 +297,21 @@ FundingOffer = _Serializer[typings.FundingOffer]("FundingOffer", labels=[
     "_PLACEHOLDER",
     "RENEW",
     "_PLACEHOLDER"
+])
+
+OrderTrade = _Serializer[typings.OrderTrade]("OrderTrade", labels=[
+    "ID",
+    "PAIR",
+    "MTS_CREATE",
+    "ORDER_ID",
+    "EXEC_AMOUNT",
+    "EXEC_PRICE",
+    "ORDER_TYPE",
+    "ORDER_PRICE",
+    "MAKER",
+    "FEE",
+    "FEE_CURRENCY",
+    "CID"
 ])
 
 Trade = _Serializer[typings.Trade]("Trade", labels=[
